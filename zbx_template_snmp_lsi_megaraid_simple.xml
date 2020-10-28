@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-10-28T03:50:07Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template SNMP LSI MegaRAID Simple</template>
+            <name>Template SNMP LSI MegaRAID Simple</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>RAID</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>MegaRAID Disks</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#DISKSTATE},LSI-MegaRAID-SAS-MIB::pdState,{#DISKSLOT},LSI-MegaRAID-SAS-MIB::slotNumber]</snmp_oid>
+                    <key>slotNumber</key>
+                    <delay>1d</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Disk Slot {#DISKSLOT} status</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>LSI-MegaRAID-SAS-MIB::pdState.{#SNMPINDEX}</snmp_oid>
+                            <key>megaraid.disk.status.[{#DISKSLOT}]</key>
+                            <delay>5m</delay>
+                            <description>Номер слота необходимо проверить</description>
+                            <applications>
+                                <application>
+                                    <name>RAID</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>LSI MegaRAID Disk Status</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(#5)}&lt;&gt;24 and {last(#5)}&lt;&gt;2</expression>
+                                    <name>Disk Slot #{#DISKSLOT} is bad</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>MegaRAID VD</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#SNMPVALUE},LSI-MegaRAID-SAS-MIB::virtualDevID]</snmp_oid>
+                    <key>virtualDevID</key>
+                    <delay>1d</delay>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Array {#SNMPVALUE} state</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>LSI-MegaRAID-SAS-MIB::state.{#SNMPINDEX}</snmp_oid>
+                            <key>megaraid.array.state.[{#SNMPINDEX}]</key>
+                            <delay>10m</delay>
+                            <applications>
+                                <application>
+                                    <name>RAID</name>
+                                </application>
+                            </applications>
+                            <valuemap>
+                                <name>LSI MegaRAID VD State</name>
+                            </valuemap>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(#5)}&lt;&gt;3</expression>
+                                    <name>Array {#SNMPVALUE} is bad</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{nodata(1h)}=1</expression>
+                                    <name>Array {#SNMPVALUE} isn't monitored</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+        </template>
+    </templates>
+    <value_maps>
+        <value_map>
+            <name>LSI MegaRAID Disk Status</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>unconfigured-good</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>unconfigured-bad</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>hot-spare</newvalue>
+                </mapping>
+                <mapping>
+                    <value>16</value>
+                    <newvalue>offline</newvalue>
+                </mapping>
+                <mapping>
+                    <value>17</value>
+                    <newvalue>failed</newvalue>
+                </mapping>
+                <mapping>
+                    <value>20</value>
+                    <newvalue>rebuild</newvalue>
+                </mapping>
+                <mapping>
+                    <value>24</value>
+                    <newvalue>online</newvalue>
+                </mapping>
+                <mapping>
+                    <value>32</value>
+                    <newvalue>copyback</newvalue>
+                </mapping>
+                <mapping>
+                    <value>65</value>
+                    <newvalue>system</newvalue>
+                </mapping>
+                <mapping>
+                    <value>128</value>
+                    <newvalue>UNCONFIGURED-SHIELDED</newvalue>
+                </mapping>
+                <mapping>
+                    <value>130</value>
+                    <newvalue>HOTSPARE-SHIELDED</newvalue>
+                </mapping>
+                <mapping>
+                    <value>144</value>
+                    <newvalue>CONFIGURED-SHIELDED</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+        <value_map>
+            <name>LSI MegaRAID VD State</name>
+            <mappings>
+                <mapping>
+                    <value>0</value>
+                    <newvalue>offline</newvalue>
+                </mapping>
+                <mapping>
+                    <value>1</value>
+                    <newvalue>partially-degraded</newvalue>
+                </mapping>
+                <mapping>
+                    <value>2</value>
+                    <newvalue>degraded</newvalue>
+                </mapping>
+                <mapping>
+                    <value>3</value>
+                    <newvalue>optimal</newvalue>
+                </mapping>
+            </mappings>
+        </value_map>
+    </value_maps>
+</zabbix_export>
